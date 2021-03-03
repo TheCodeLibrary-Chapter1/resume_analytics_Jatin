@@ -1,0 +1,4 @@
+# To generate the requirements.txt: pip freeze > requirements.txt
+# To run the server: python manage.py runserver 8001
+# To python -m spacy download en_core_web_sm
+# To activate the virtual env: source env2/bin/activate
