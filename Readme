@@ -2,3 +2,8 @@
 # To run the server: python manage.py runserver 8001
 # To python -m spacy download en_core_web_sm
 # To activate the virtual env: source env2/bin/activate
+# To install the Reuirements.txt: pip install -r requirements.txt
+# https://virtualenvwrapper.readthedocs.io/en/latest/install.html
+# To run the server on Linux: sudo python3 manage.py runserver
+# To sudo python3.6 manage.py runserver 159.65.148.176:9002
+# To activate Linux server: source newenv/bin/activate
