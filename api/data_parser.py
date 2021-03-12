@@ -21,27 +21,28 @@ import operator
 import string
 import nltk
 from stemming.porter2 import stem
-# import en_core_web_sm
+import en_core_web_sm
 
 # load pre-trained model
 base_path = os.path.dirname(__file__)
 
-nlp = spacy.load('en_core_web_sm')
-# nlp = en_core_web_sm.load()
-custom_nlp2 = spacy.load(os.path.join(base_path, "data_files", "degree", "model"))
+
+# nlp = spacy.load('en_core_web_sm')
+nlp = en_core_web_sm.load()
+custom_nlp2 = spacy.load(os.path.join(base_path,"data_files","degree","model"))
 
 # initialize matcher with a vocab
 matcher = Matcher(nlp.vocab)
 
-file = os.path.join(base_path, "data_files", "titles_combined.txt")
+file = os.path.join(base_path,"data_files","titles_combined.txt")
 file = open(file, "r", encoding='utf-8')
 designation = [line.strip().lower() for line in file]
 designitionmatcher = PhraseMatcher(nlp.vocab)
 patterns = [nlp.make_doc(text) for text in designation if len(nlp.make_doc(text)) < 10]
 designitionmatcher.add("Job title", None, *patterns)
 
-file = os.path.join(base_path, "data_files", "SKILLS.txt")
-file = open(file, "r", encoding='utf-8')
+file = os.path.join(base_path,"data_files","SKILLS.txt")
+file = open(file, "r", encoding='utf-8')    
 skill = [line.strip().lower() for line in file]
 skillsmatcher = PhraseMatcher(nlp.vocab)
 patterns = [nlp.make_doc(text) for text in skill if len(nlp.make_doc(text)) < 10]
@@ -50,6 +51,7 @@ skillsmatcher.add("Job title", None, *patterns)
 
 
 class resumeparse(object):
+
     objective = (
         'career goal',
         'objective',
@@ -125,7 +127,7 @@ class resumeparse(object):
         'technical skills',
         'computer skills',
         'personal skills',
-        'computer knowledge',
+        'computer knowledge',        
         'technologies',
         'technical experience',
         'proficiencies',
@@ -134,10 +136,7 @@ class resumeparse(object):
         'programming languages',
         'competencies',
         'software proficiency',
-        'responsibilities',
-        'key competencies & skills',
-        'technical qualification',
-        'technology used'
+        'responsibilities'
     )
 
     misc = (
@@ -182,6 +181,7 @@ class resumeparse(object):
         'theses',
     )
 
+                   
     def find_segment_indices(string_to_search, resume_segments, resume_indices):
         for i, line in enumerate(string_to_search):
 
@@ -294,16 +294,18 @@ class resumeparse(object):
         regex_year = r'((20|19)(\d{2})|(\d{2}))'
         year = regex_year
         start_date = month + not_alpha_numeric + r"?" + year
+        
 
         end_date = r'((' + number + r'?' + not_alpha_numeric + r"?" + month + not_alpha_numeric + r"?" + year + r')|(present|current))'
         longer_year = r"((20|19)(\d{2}))"
         year_range = longer_year + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))" + r'(' + longer_year + r'|(present|current))'
         date_range = r"(" + start_date + r"(" + not_alpha_numeric + r"{1,4}|(\s*to\s*))" + end_date + r")|(" + year_range + r")"
 
+        
         regular_expression = re.compile(date_range, re.IGNORECASE)
-
+        
         regex_result = re.search(regular_expression, resume_text)
-
+        
         while regex_result:
 
             date_range = regex_result.group()
@@ -336,6 +338,7 @@ class resumeparse(object):
 
                 start_year_result = start_date_find.group().strip().split(non_alpha_find.group())[-1]
 
+               
                 start_year_result = int(correct_year(start_year_result))
 
                 if date_range.lower().find('present') != -1 or date_range.lower().find('current') != -1:
@@ -356,17 +359,31 @@ class resumeparse(object):
 
             resume_text = resume_text[regex_result.end():].strip()
             regex_result = re.search(regular_expression, resume_text)
-
+        
         return end_year - start_year  # Use the obtained month attribute
+
 
     def get_experience(resume_segments):
         total_exp = 0
+        if len(resume_segments['objective'].keys()):
+            text = ""
+            for key, values in resume_segments['objective'].items():
+                text += " ".join(values) + " "
+            rx = re.compile(r"(\d+(?:-\d+)?\+?)\s*(years?)", re.I)
+            op = rx.search(text)
+
+            final_exp = [float(i) for i in op.groups() if i.isnumeric()]
+            if len(final_exp) > 0:
+                total_exp_objective = max(final_exp)
+            else:
+                total_exp_objective = 'Could not be calculated'
+                    
         if len(resume_segments['work_and_employment'].keys()):
             text = ""
             for key, values in resume_segments['work_and_employment'].items():
                 text += " ".join(values) + " "
             total_exp = resumeparse.calculate_experience(text)
-            return total_exp, text
+            return total_exp, text,total_exp_objective
         else:
             text = ""
             for key in resume_segments.keys():
@@ -377,8 +394,8 @@ class resumeparse(object):
                         for key_inner, value in resume_segments[key].items():
                             text += " ".join(value) + " "
             total_exp = resumeparse.calculate_experience(text)
-            return total_exp, text
-        return total_exp, " "
+            return total_exp, text,total_exp_objective
+        return total_exp, " ",total_exp_objective
 
     def find_phone(text):
         try:
@@ -403,12 +420,12 @@ class resumeparse(object):
         nlp_text = nlp(resume_text)
 
         # First name and Last name are always Proper Nouns
-
+     
         pattern = [{'POS': 'PROPN'}, {'POS': 'PROPN'}]
         matcher.add('NAME', None, pattern)
 
         matches = matcher(nlp_text)
-
+        
         for match_id, start, end in matches:
             span = nlp_text[start:end]
             if str(span) != 'CURRICULUM VITAE':
@@ -424,17 +441,18 @@ class resumeparse(object):
 
         for i in range(len(listex)):
             for ii in range(len(listsearch)):
-
+                
                 if re.findall(listex[i], re.sub(' +', ' ', listsearch[ii])):
+                
                     college_name.append(listex[i])
-
+        
         return college_name
 
     def job_designition(text):
         job_titles = []
-
+        
         __nlp = nlp(text.lower())
-
+        
         matches = designitionmatcher(__nlp)
         for match_id, start, end in matches:
             span = __nlp[start:end]
@@ -447,7 +465,7 @@ class resumeparse(object):
 
         degree = [ent.text.replace("\n", " ") for ent in list(doc.ents) if ent.label_ == 'Degree']
         return list(dict.fromkeys(degree).keys())
-
+    
     def extract_skills(text):
 
         skills = {}
@@ -456,23 +474,24 @@ class resumeparse(object):
         print('here')
         matches = skillsmatcher(__nlp)
         for match_id, start, end in matches:
-            rule_id = nlp.vocab.strings[match_id]
+            rule_id = nlp.vocab.strings[match_id] 
             span = __nlp[start:end]
             skills[rule_id] = span.text
 
         return skills
-
+    
     def extract_degree(text):
-
-        degree = open(os.path.join(base_path, 'data_files', 'education.txt'), 'r').read()
-        degree = set(degree.split('\n'))
+       
+        degree=open(os.path.join(base_path,'data_files','education.txt'),'r').read()
+        degree=set(degree.split('\n'))
         education = []
         for key in degree:
             lookup_key = r"\b{0}\b".format(key)
             try:
-                temp = text[re.search(lookup_key, text).span()[0]:re.search(lookup_key, text).span()[1]]
+                temp = text[re.search(lookup_key,text).span()[0]:re.search(lookup_key,text).span()[1]]
                 education.append(temp)
             except:
                 pass
         return education
 
+    
