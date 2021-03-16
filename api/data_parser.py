@@ -371,10 +371,15 @@ class resumeparse(object):
                 text += " ".join(values) + " "
             rx = re.compile(r"(\d+(?:-\d+)?\+?)\s*(years?)", re.I)
             op = rx.search(text)
-
-            final_exp = [float(i) for i in op.groups() if i.isnumeric()]
-            if len(final_exp) > 0:
-                total_exp_objective = max(final_exp)
+            print(text)
+            
+            if op!=None:
+                final_exp = [float(i) for i in op.groups() if i.isnumeric()]
+                if len(final_exp) > 0:
+                    total_exp_objective = max(final_exp)
+                else:
+                    total_exp_objective = 'Could not be calculated'
+                
             else:
                 total_exp_objective = 'Could not be calculated'
                     
