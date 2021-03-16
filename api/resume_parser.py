@@ -1,13 +1,12 @@
+from data_parser import resumeparse,base_path
+from file_reader import read_file
 import os
-import configparser
 import json
 import re
 import sys
-from api.data_parser import resumeparse, base_path
-from api.file_reader import read_file
 
 
-def parse_resume(file, job_desc_name=' ', job_desc_id=0, created_by=' ', comp_id=0, profile_loc=' '):
+def parse_resume(file,job_desc_name = ' ',job_desc_id = 0,created_by = ' ',comp_id = 0,profile_loc = ' '):
     '''This function parses resume.'''
     resume_lines = read_file(file)
     
