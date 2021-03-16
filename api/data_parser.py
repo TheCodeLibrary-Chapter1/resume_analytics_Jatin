@@ -371,7 +371,6 @@ class resumeparse(object):
                 text += " ".join(values) + " "
             rx = re.compile(r"(\d+(?:-\d+)?\+?)\s*(years?)", re.I)
             op = rx.search(text)
-            print(text)
             
             if op!=None:
                 final_exp = [float(i) for i in op.groups() if i.isnumeric()]
