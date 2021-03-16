@@ -49,12 +49,12 @@ def parse_resume(file, job_desc_name=' ', job_desc_id=0, created_by=' ', comp_id
     
     # degree
     final_degree = list(set(degree + degree2))
-    if total_ex_obj != None:
+    if str(total_ex_obj) !='Could not be calculated':
         total_exp_final=total_ex_obj
     elif total_exp != None:
         total_exp_final=total_exp
     else: 
-        total_exp_final='Could not be computed'
+        total_exp_final='Could not be calculated'
     
     
     output_json = {'Job Description Name' : job_desc_name,
