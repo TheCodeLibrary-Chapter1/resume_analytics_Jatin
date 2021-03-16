@@ -26,6 +26,7 @@ import en_core_web_sm
 # load pre-trained model
 base_path = os.path.dirname(__file__)
 
+
 # nlp = spacy.load('en_core_web_sm')
 nlp = en_core_web_sm.load()
 custom_nlp2 = spacy.load(os.path.join(base_path,"data_files","degree","model"))
@@ -370,6 +371,7 @@ class resumeparse(object):
                 text += " ".join(values) + " "
             rx = re.compile(r"(\d+(?:-\d+)?\+?)\s*(years?)", re.I)
             op = rx.search(text)
+
             
             if op!=None:
                 final_exp = [float(i) for i in op.groups() if i.isnumeric()]
